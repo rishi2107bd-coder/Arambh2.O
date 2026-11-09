@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Arambh 2.0 – Robotics Store</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap"><style>:root{--bg:#EEF2F7;--surface:#fff;--ink:#12264A;--muted:#5B6B82;--line:#D3DBE6;--accent:#FF6B1A;--accent-ink:#fff;--ok:#12805C;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1A30;--surface:#16284A;--ink:#E8EEF8;--muted:#9FB0C8;--line:#2B4066;--ok:#3CCB9A}}
+:root[data-theme="dark"]{--bg:#0E1A30;--surface:#16284A;--ink:#E8EEF8;--muted:#9FB0C8;--line:#2B4066;--ok:#3CCB9A}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 "IBM Plex Sans",system-ui,sans-serif}
+h1,h2,h3,.logo{font-family:"Bricolage Grotesque","IBM Plex Sans",sans-serif;margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--ink);color:#fff;display:flex;gap:12px;align-items:center;padding:12px 20px;flex-wrap:wrap}
+.logo{font-weight:800;font-size:1.5rem;letter-spacing:-.02em}
+.logo b{color:var(--accent)}
+.search{flex:1;min-width:180px;max-width:480px;padding:10px 14px;border-radius:8px;border:0;background:#fff;color:#12264A}
+.btn{border:0;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
+.btn.alt{background:transparent;color:inherit;border:1.5px solid currentColor}
+.btn.sm{padding:7px 12px;font-size:.9rem}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.hero{padding:44px 20px 28px;max-width:1100px;margin:auto}
+.hero h1{font-size:clamp(2rem,6vw,3.6rem);font-weight:800;line-height:1.05;letter-spacing:-.03em;max-width:15ch}
+.hero p{color:var(--muted);max-width:52ch;margin:14px 0 20px}
+.hero .row{display:flex;gap:10px;flex-wrap:wrap}
+main{max-width:1100px;margin:auto;padding:0 20px 60px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 20px}
+.chip{border:1.5px solid var(--line);background:var(--surface);border-radius:99px;padding:6px 14px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.bar select{padding:8px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px}
+.card{background:var(--surface);border:1.5px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.thumb{height:130px;display:grid;place-items:center}
+.thumb svg{width:64px;height:64px}
+.info{padding:14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.info h3{font-size:1.05rem;font-weight:600}
+.meta{color:var(--muted);font-size:.86rem}
+.price{font-weight:600;font-size:1.2rem;margin-top:auto}
+.tag{font-size:.78rem;border-radius:6px;padding:2px 8px;background:var(--bg);align-self:flex-start}
+.tag.used{color:var(--ok)}
+.empty{padding:40px;text-align:center;color:var(--muted);border:1.5px dashed var(--line);border-radius:12px}
+dialog{border:0;border-radius:14px;padding:22px;width:min(440px,92vw);max-height:92vh;background:var(--surface);color:var(--ink)}
+#adminDlg{width:min(680px,94vw)}
+dialog::backdrop{background:rgba(10,20,40,.55)}
+label{display:block;font-weight:500;margin:12px 0 4px}
+input,select,textarea{width:100%;padding:9px 11px;border-radius:8px;border:1.5px solid var(--line);background:var(--bg)}
+input[type=checkbox]{width:auto;margin-right:8px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cartrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.total{display:flex;justify-content:space-between;font-weight:600;font-size:1.15rem;margin:14px 0}
+.sec{margin-top:22px;padding-top:16px;border-top:2px solid var(--line)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50}
+.toast.on{opacity:1}
+.notice{margin-top:18px;padding:12px 16px;border-left:5px solid var(--accent);background:var(--surface);border-radius:8px;max-width:640px;font-size:.95rem}
+.how{max-width:1100px;margin:0 auto 24px;padding:0 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.how div{background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:2px}
+.how span{color:var(--muted);font-size:.9rem}
+.fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:30;text-decoration:none;box-shadow:0 6px 18px rgba(0,0,0,.25);border-radius:99px!important;padding:12px 18px!important}
+.thumb span{font-size:3rem}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+footer{text-align:center;color:var(--muted);padding:24px;font-size:.9rem}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.err{color:#C0392B}.thumb img{width:100%;height:100%;object-fit:cover}.login{max-width:420px;margin:60px auto;background:var(--surface);padding:24px;border-radius:14px;border:1.5px solid var(--line)}.wrap{max-width:900px;margin:auto;padding:20px}.qr img{width:180px;background:#fff;padding:6px;border-radius:8px}</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script><script src="config.js"></script></head><body>
+<header>
+  <span class="logo">Arambh <b>2.0</b></span>
+  <input id="q" class="search" type="search" placeholder="Search motors, sensors, kits…" aria-label="Search products">
+  <a class="btn alt sm" data-ig="" href="https://www.instagram.com/arambhtechco/" target="_blank" rel="noopener" style="text-decoration:none">Help Center</a>
+  <button class="btn alt sm" id="sellBtn">Sell your product</button>
+  <a class="btn alt sm" href="/admin.html" style="text-decoration:none">Owner</a>
+  <button class="btn sm" id="cartBtn">Cart (<span id="cnt">0</span>)</button>
+  
+</header>
+
+<section class="hero">
+  <h1 id="heroH">Every robot starts somewhere.</h1>
+  <p id="heroP">Buy sensors, motors, controllers and kits directly from us. No middleman: we own every product we sell, and we confirm your delivery address with you on Instagram. Have parts you no longer use? List them and sell to other makers.</p>
+  <div class="row"><a class="btn" href="#shop" style="text-decoration:none">Browse products</a><a class="btn alt" data-ig="" href="https://www.instagram.com/arambhtechco/" target="_blank" rel="noopener" style="text-decoration:none;color:var(--ink)">Chat on Instagram</a><button class="btn alt" id="sellBtn2" style="color:var(--ink)">Sell your product</button></div>
+<div class="notice"><b>Before you buy:</b> please message us on Instagram to confirm stock, price and delivery. Then place your order here.</div>
+</section>
+<div class="how"><div><b>1 · Choose</b><span>Add robotics parts to your cart.</span></div><div><b>2 · Chat</b><span>Send your order on Instagram.</span></div><div><b>3 · Delivered</b><span>We confirm your address and ship. No middleman.</span></div></div>
+
+<main id="shop">
+  <div class="chips" id="chips" role="group" aria-label="Categories"></div>
+  <div class="bar"><h2 id="resultTitle">Loading products…</h2>
+    <select id="sort" aria-label="Sort"><option value="new">Newest</option><option value="lo">Price: low to high</option><option value="hi">Price: high to low</option></select>
+  </div>
+  <div class="grid" id="grid" style="margin-top:16px"></div>
+</main>
+<footer>Arambh 2.0 · Sold directly by us, no middleman. Questions or delivery address: <a data-ig="" href="https://www.instagram.com/arambhtechco/" target="_blank" rel="noopener" style="color:inherit">Message us on Instagram</a></footer>
+
+<dialog id="cartDlg"><h2>Your cart</h2><div id="cartBody"></div>
+  <p class="meta">Instagram can’t prefill messages, so we show your order for you to copy. Send it in the chat and add your delivery address.</p><div class="total"><span>Total</span><span id="cartTotal">₹0</span></div>
+  <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn alt sm" data-close="">Keep shopping</button><button class="btn sm" id="checkout">Order on Instagram</button></div>
+</dialog>
+
+<dialog id="sellDlg"><h2>Sell your product</h2>
+  <p class="meta">Fill in the details. When you publish, we show them so you can send them to our Instagram account and agree on the delivery address.</p>
+  <form id="sellForm" onsubmit="return false">
+    <label for="f_name">Product name</label><input id="f_name" required="" maxlength="60">
+    <label for="f_cat">Category</label><select id="f_cat"></select>
+    <label for="f_cond">Condition</label><select id="f_cond"><option>New</option><option>Used – like new</option><option>Used – good</option></select>
+    <label for="f_price">Your price (₹). We add ₹<span class="mk">30</span> on the site.</label><input id="f_price" type="number" min="1" required="">
+    <label for="f_seller">Your name or shop</label><input id="f_seller" required="" maxlength="40">
+    <label for="f_contact">Your Instagram id or phone</label><input id="f_contact" required="" maxlength="40">
+    <label for="f_desc">Short description</label><textarea id="f_desc" rows="2" maxlength="140"></textarea>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px"><button type="button" class="btn alt sm" data-close="">Cancel</button><button type="submit" class="btn sm" id="publish">Publish listing</button></div>
+  </form>
+</dialog>
+
+<dialog id="sentDlg"><h2 id="sentH">Ready to send</h2><p class="meta" id="sentP"></p><textarea id="sentTxt" rows="6" readonly=""></textarea><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button class="btn alt sm" data-close="">Close</button><a class="btn sm" data-ig="" href="https://www.instagram.com/arambhtechco/" target="_blank" rel="noopener" style="text-decoration:none">Open Instagram</a></div></dialog>
+
+
+<a class="btn fab" data-ig="" href="https://www.instagram.com/arambhtechco/" target="_blank" rel="noopener">💬 Chat with seller</a>
+<div class="toast" id="toast" role="status"></div>
+<script>
+if(typeof CFG==="undefined"||/YOUR-/.test(CFG.url)){var _e=document.getElementById("resultTitle");if(_e)_e.textContent="Setup needed: open config.js (same folder as this file) and paste your Supabase URL and anon key.";throw new Error("config.js not set")}
+const $=id=>document.getElementById(id);
+const db=supabase.createClient(CFG.url,CFG.key);
+const ICON={"Sensors":"📡","Motors & drivers":"⚙️","Controllers":"🧠","Robot kits":"🤖","Batteries & power":"🔋","Tools & parts":"🛠️"};
+const CATS={"Sensors":"#2E86C1","Motors & drivers":"#E67E22","Controllers":"#16A085","Robot kits":"#8E44AD","Batteries & power":"#C0392B","Tools & parts":"#5D6D7E"};
+let S={settings:{ig:"arambhtechco",markup:30,heroTitle:"",heroText:""},products:[]},local=[],cart=[],cat="All";
+try{const s=JSON.parse(localStorage.getItem("arambh_listings2")||"[]");if(Array.isArray(s))local=s}catch(e){}
+const MK=()=>Math.max(0,+S.settings.markup||0),pr=p=>p.price+MK(),all=()=>local.concat(S.products);
+const inr=n=>"₹"+n.toLocaleString("en-IN");
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("on");setTimeout(()=>t.classList.remove("on"),2400)}
+function applySettings(){const s=S.settings;if(s.heroTitle)$("heroH").textContent=s.heroTitle;if(s.heroText)$("heroP").textContent=s.heroText;
+ document.querySelectorAll("a[data-ig]").forEach(a=>a.href="https://www.instagram.com/"+encodeURIComponent(s.ig)+"/");
+ document.querySelectorAll(".mk").forEach(e=>e.textContent=MK())}
+async function load(){
+ const [p,s]=await Promise.all([db.from("products").select("*").neq("status","hidden").order("created_at",{ascending:false}),db.from("settings").select("*").eq("id",1).maybeSingle()]);
+ if(p.error){$("resultTitle").textContent="Could not load products";return}
+ S.products=p.data.map(r=>({id:r.id,name:r.name,cat:r.cat,cond:r.cond,price:r.price,desc:r.description,img:r.image_url,official:r.official,seller:r.seller,status:(r.status==="soldout"||r.stock<=0)?"soldout":"available"}));
+ if(s.data)S.settings={ig:s.data.ig,markup:s.data.markup,heroTitle:s.data.hero_title,heroText:s.data.hero_text};
+ applySettings();chips();render();drawCart()}
+function chips(){$("chips").innerHTML=["All",...Object.keys(CATS)].map(c=>`<button class="chip" aria-pressed="${c===cat}" data-c="${esc(c)}">${esc(c)}</button>`).join("");$("f_cat").innerHTML=Object.keys(CATS).map(c=>`<option>${esc(c)}</option>`).join("")}
+function render(){
+ const q=$("q").value.trim().toLowerCase();
+ let l=all().filter(p=>(cat==="All"||p.cat===cat)&&(!q||(p.name+p.desc+p.seller+p.cat).toLowerCase().includes(q)));
+ const s=$("sort").value;if(s==="lo")l.sort((a,b)=>pr(a)-pr(b));if(s==="hi")l.sort((a,b)=>pr(b)-pr(a));
+ $("resultTitle").textContent=(cat==="All"?"All products":cat)+" ("+l.length+")";
+ $("grid").innerHTML=l.length?l.map(p=>`<article class="card"><div class="thumb" style="background:${CATS[p.cat]||"#888"}22">${p.img?`<img src="${esc(p.img)}" alt="${esc(p.name)}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'📦'}))">`:`<span aria-hidden="true">${ICON[p.cat]||"🔩"}</span>`}</div>
+ <div class="info"><span class="tag ${p.cond==="New"?"":"used"}">${esc(p.cond)}</span><h3>${esc(p.name)}</h3><div class="meta">${esc(p.desc)}</div><div class="meta">${p.official?"Sold directly by Arambh 2.0":"Community seller: "+esc(p.seller)}</div><div class="price">${inr(pr(p))}</div>
+ ${p.status==="soldout"?'<button class="btn sm" disabled>Sold out</button>':`<div class="acts"><button class="btn sm" data-add="${esc(p.id)}">Add to cart</button><button class="btn alt sm" data-ask="${esc(p.id)}">Ask on Instagram</button></div>`}</div></article>`).join(""):`<div class="empty" style="grid-column:1/-1">No products match. Try another category.</div>`}
+const inCart=()=>cart.map(id=>all().find(p=>p.id==id)).filter(Boolean);
+function drawCart(){const l=inCart();$("cnt").textContent=l.length;
+ $("cartBody").innerHTML=l.length?l.map(p=>`<div class="cartrow"><span>${esc(p.name)}<br><span class="meta">${esc(p.official?"Arambh 2.0":p.seller)}</span></span><span>${inr(pr(p))} <button class="btn alt sm" data-rm="${esc(p.id)}">Remove</button></span></div>`).join(""):`<div class="empty">Your cart is empty.</div>`;
+ $("cartTotal").textContent=inr(l.reduce((a,p)=>a+pr(p),0))}
+function showSend(h,p,t){$("sentH").textContent=h;$("sentP").textContent=p;$("sentTxt").value=t;$("sentDlg").showModal()}
+document.addEventListener("click",e=>{const ig=e.target.closest&&e.target.closest("a[data-ig]");
+ if(ig){e.preventDefault();const w=window.open(ig.href,"_blank","noopener");if(!w)location.href=ig.href;return}
+ const t=e.target,d=t.dataset;
+ if(d.c){cat=d.c;chips();render()}
+ if(d.add){cart.push(d.add);drawCart();toast("Added to cart")}
+ if(d.ask){const p=all().find(x=>x.id==d.ask);showSend("Ask the seller","Copy this message and send it on Instagram.","Hi Arambh 2.0, I am interested in: "+p.name+" ("+inr(pr(p))+"). Is it available? My city: ")}
+ if(d.rm){const i=cart.findIndex(x=>x==d.rm);if(i>-1)cart.splice(i,1);drawCart()}
+ if(t.hasAttribute("data-close"))t.closest("dialog").close()});
+$("q").oninput=render;$("sort").onchange=render;
+$("cartBtn").onclick=()=>{drawCart();$("cartDlg").showModal()};
+$("sellBtn").onclick=$("sellBtn2").onclick=()=>$("sellDlg").showModal();
+$("checkout").onclick=()=>{const l=inCart();if(!l.length){toast("Add a product first");return}
+ showSend("Order ready","Copy this order and send it on Instagram with your delivery address.","Hi Arambh 2.0, I want to order:\n"+l.map(p=>"- "+p.name+" ("+inr(pr(p))+")").join("\n")+"\nTotal: "+inr(l.reduce((a,p)=>a+pr(p),0))+"\nMy delivery address: ");
+ cart=[];drawCart();$("cartDlg").close()};
+$("sellForm").addEventListener("submit",()=>{const f=$("sellForm");if(!f.reportValidity())return;
+ const p={id:"L"+Date.now(),name:$("f_name").value.trim(),cat:$("f_cat").value,cond:$("f_cond").value,price:Math.round(+$("f_price").value),seller:$("f_seller").value.trim(),desc:$("f_desc").value.trim()||"No description.",official:false,status:"available"};
+ local.unshift(p);try{localStorage.setItem("arambh_listings2",JSON.stringify(local))}catch(e){}
+ const c=$("f_contact").value.trim();f.reset();$("sellDlg").close();cat="All";chips();render();
+ showSend("Listing ready","Send these details on Instagram so we can connect you with buyers.","Hi Arambh 2.0, I want to sell on your site:\n"+p.name+" | "+p.cat+" | "+p.cond+" | "+inr(p.price)+"\nSeller: "+p.seller+" ("+c+")\n"+p.desc)});
+/* Realtime: any admin change to products/settings refetches instantly */
+db.channel("live").on("postgres_changes",{event:"*",schema:"public",table:"products"},load).on("postgres_changes",{event:"*",schema:"public",table:"settings"},load).subscribe();
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)load()});
+load();
+</script></body></html>
