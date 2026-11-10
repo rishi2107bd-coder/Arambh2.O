@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="robots" content="noindex"><title>Arambh 2.0 – Owner dashboard</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap"><link rel="stylesheet" href="theme.css">
+<style>
+:root{--bg:#0b1020;--panel:#11182b;--line:#26324d;--text:#eef3ff;--muted:#9ba8c7;--accent:#8b5cf6;--danger:#ff6b6b}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(135deg,#080c18,#11182b);color:var(--text);font-family:IBM Plex Sans,Arial,sans-serif;min-height:100vh}
+header{height:72px;padding:0 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:rgba(8,12,24,.88)}
+.logo{font-size:22px;font-weight:700}.logo b{color:#a78bfa}
+a{color:#c4b5fd}
+.btn{border:0;border-radius:10px;background:var(--accent);color:#fff;padding:11px 18px;font-weight:600;cursor:pointer}
+.btn.alt{background:transparent;border:1px solid var(--line)}.btn.sm{padding:8px 13px}.btn:disabled{opacity:.6;cursor:not-allowed}
+.login{width:min(440px,calc(100% - 32px));margin:90px auto;padding:30px;background:rgba(17,24,43,.94);border:1px solid var(--line);border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.login h2{margin-top:0}.login label,.wrap label{display:block;margin:14px 0 6px;font-weight:600}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid #34415f;border-radius:9px;background:#0b1020;color:var(--text);outline:none}
+input:focus,select:focus,textarea:focus{border-color:#8b5cf6}
+.err{color:#ff8b8b;min-height:20px}.meta{color:var(--muted);font-size:14px}
+.wrap{width:min(1050px,calc(100% - 32px));margin:32px auto 80px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.sec{margin-top:32px;border-bottom:1px solid var(--line);padding-bottom:10px}
+.cartrow{display:flex;justify-content:space-between;gap:20px;align-items:center;padding:15px 0;border-bottom:1px solid var(--line)}
+.toast{position:fixed;right:22px;bottom:22px;padding:12px 16px;border-radius:10px;background:#18233d;border:1px solid var(--line);opacity:0;pointer-events:none;transition:.2s}
+.toast.on{opacity:1}.empty{color:var(--muted);padding:18px 0}
+@media(max-width:700px){.two{grid-template-columns:1fr}header{padding:0 16px}.wrap{width:min(100% - 20px,1050px)}}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script><script src="config.js"></script></head><body>
+<header><span class="logo">Arambh <b>2.0</b> Owner</span><a class="btn alt sm" href="index.html" style="text-decoration:none">View store</a><button class="btn alt sm" id="out" hidden>Sign out</button></header>
+<div id="login" class="login"><h2>Owner sign in</h2>
+<div id="s1"><label for="em">Email</label><input id="em" type="email" autocomplete="username"><label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password"><p class="err" id="e1"></p><button class="btn" id="go">Sign in</button></div>
+<div id="s2" hidden><p class="meta" id="mfaMsg"></p><div class="qr" id="qr"></div><label for="code">6-digit code from your authenticator app</label><input id="code" inputmode="numeric" maxlength="6" autocomplete="one-time-code"><p class="err" id="e2"></p><button class="btn" id="verify">Verify</button></div></div>
+<div id="app" class="wrap" hidden>
+<h2 id="pt">Add a product</h2>
+<form id="pf" onsubmit="return false"><div class="two">
+<div><label for="a_name">Product name</label><input id="a_name" required maxlength="60"></div>
+<div><label for="a_cat">Category</label><select id="a_cat"></select></div>
+<div><label for="a_cond">Condition</label><select id="a_cond"><option>New</option><option>Used – like new</option><option>Used – good</option></select></div>
+<div><label for="a_status">Status</label><select id="a_status"><option value="available">Available</option><option value="soldout">Sold out</option><option value="hidden">Hidden</option></select></div>
+<div><label for="a_price">Price (₹)</label><input id="a_price" type="number" min="1" max="1000000" required></div>
+<div><label for="a_stock">Stock</label><input id="a_stock" type="number" min="0" max="100000" required value="1"></div></div>
+<label for="a_desc">Description</label><textarea id="a_desc" rows="2" maxlength="140"></textarea>
+<label for="a_img">Image (JPG, PNG or WebP, max 2 MB)</label><input id="a_img" type="file" accept="image/jpeg,image/png,image/webp">
+<p class="meta" id="pm"></p>
+<div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn alt sm" id="clr">Clear</button><button type="button" class="btn sm" id="save">Save product</button></div></form>
+<h3 class="sec">Products</h3><div id="list"></div>
+<h3 class="sec">Site settings</h3>
+<label for="s_hero">Hero title</label><input id="s_hero" maxlength="120"><label for="s_text">Hero text</label><textarea id="s_text" rows="3" maxlength="400"></textarea>
+<div class="two"><div><label for="s_ig">Instagram id</label><input id="s_ig" maxlength="30"></div><div><label for="s_mk">Community markup (₹)</label><input id="s_mk" type="number" min="0" max="10000"></div></div>
+<button class="btn sm" id="ssave" style="margin-top:10px">Save settings</button><p class="meta" id="sm"></p></div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const $=id=>document.getElementById(id);
+let db=null;
+if(typeof CFG==="undefined" || !CFG || !CFG.url || !CFG.key){
+  $("e1").textContent="Supabase configuration not loaded. Keep config.js in the same folder as admin.html.";
+}else if(typeof supabase==="undefined"){
+  $("e1").textContent="Supabase library failed to load. Check your internet connection.";
+}else{
+  db=supabase.createClient(CFG.url,CFG.key);
+}
+const CATS=["Sensors","Motors & drivers","Controllers","Robot kits","Batteries & power","Tools & parts"];
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const toast=m=>{const t=$("toast");t.textContent=m;t.classList.add("on");setTimeout(()=>t.classList.remove("on"),2400)};
+let rows=[],editing=null,factor=null;
+async function sha256(o){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(JSON.stringify(o)));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+async function gate(){
+  if(!db)return;
+  const {data:{session},error}=await db.auth.getSession();
+  if(error){
+    $("e1").textContent=`Session error: ${error.message}`;
+    show("s1");
+    return;
+  }
+  if(!session){
+    show("s1");
+    return;
+  }
+  await enter();
+}
+function show(s){$("login").hidden=false;$("app").hidden=true;$("s1").hidden=s!=="s1";$("s2").hidden=s!=="s2"}
+$("go").onclick=async()=>{
+  $("e1").textContent="";
+  const email=$("em").value.trim();
+  const password=$("pw").value;
+
+  if(!email || !password){
+    $("e1").textContent="Enter your email and password.";
+    return;
+  }
+
+  if(!CFG || !CFG.url || !CFG.key){
+    $("e1").textContent="Supabase configuration is missing. Check config.js.";
+    return;
+  }
+
+  $("go").disabled=true;
+  $("go").textContent="Signing in…";
+
+  try{
+    const {error}=await db.auth.signInWithPassword({email,password});
+
+    if(error){
+      console.error("Supabase sign-in error:", error);
+      $("e1").textContent=`Sign-in failed: ${error.message}`;
+      return;
+    }
+
+    await gate();
+  }catch(err){
+    console.error("Unexpected sign-in error:", err);
+    $("e1").textContent=`Sign-in failed: ${err.message || err}`;
+  }finally{
+    $("go").disabled=false;
+    $("go").textContent="Sign in";
+  }
+};
+$("verify").onclick=async()=>{$("e2").textContent="";const c=await db.auth.mfa.challenge({factorId:factor});if(c.error){$("e2").textContent=c.error.message;return}
+ const v=await db.auth.mfa.verify({factorId:factor,challengeId:c.data.id,code:$("code").value.trim()});if(v.error){$("e2").textContent="Wrong code.";return}gate()};
+async function enter(){
+ const {data:{user}}=await db.auth.getUser();const {data:p}=await db.from("profiles").select("role").eq("id",user.id).maybeSingle();
+ if(!p||p.role!=="admin"){await db.auth.signOut();show("s1");$("e1").textContent="This account does not have owner access.";return}
+ $("login").hidden=true;$("app").hidden=false;$("out").hidden=false;$("a_cat").innerHTML=CATS.map(c=>`<option>${esc(c)}</option>`).join("");
+ await Promise.all([loadP(),loadS()]);
+ db.channel("admin").on("postgres_changes",{event:"*",schema:"public",table:"products"},loadP).subscribe()}
+$("out").onclick=async()=>{await db.auth.signOut();location.reload()};
+async function loadP(){const {data,error}=await db.from("products").select("*").order("created_at",{ascending:false});if(error){toast(error.message);return}rows=data;
+ $("list").innerHTML=rows.map(p=>`<div class="cartrow"><span><b>${esc(p.name)}</b><br><span class="meta">₹${p.price} · stock ${p.stock} · ${esc(p.status)} · ${esc(p.cat)}</span></span><span><button class="btn alt sm" data-e="${p.id}">Edit</button> <button class="btn alt sm" data-d="${p.id}">Delete</button></span></div>`).join("")||'<div class="empty">No products yet.</div>'}
+async function loadS(){const {data}=await db.from("settings").select("*").eq("id",1).maybeSingle();if(!data)return;$("s_hero").value=data.hero_title;$("s_text").value=data.hero_text;$("s_ig").value=data.ig;$("s_mk").value=data.markup}
+function clear(){editing=null;$("pf").reset();$("pt").textContent="Add a product";$("pm").textContent=""}
+$("clr").onclick=clear;
+document.addEventListener("click",async e=>{const d=e.target.dataset;
+ if(d.e){const p=rows.find(x=>x.id==d.e);editing=p.id;$("pt").textContent="Edit product";$("a_name").value=p.name;$("a_cat").value=p.cat;$("a_cond").value=p.cond;$("a_status").value=p.status;$("a_price").value=p.price;$("a_stock").value=p.stock;$("a_desc").value=p.description;scrollTo(0,0)}
+ if(d.d&&confirm("Delete this product permanently?")){const {error}=await db.from("products").delete().eq("id",d.d);toast(error?error.message:"Deleted")}});
+$("save").onclick=async()=>{
+ if(!$("pf").reportValidity())return;$("pm").textContent="Saving…";
+ const r={name:$("a_name").value.trim(),cat:$("a_cat").value,cond:$("a_cond").value,status:$("a_status").value,price:Math.round(+$("a_price").value),stock:Math.round(+$("a_stock").value),description:$("a_desc").value.trim()||"No description."};
+ const f=$("a_img").files[0];
+ if(f){if(!["image/jpeg","image/png","image/webp"].includes(f.type)||f.size>2097152){$("pm").textContent="Image must be JPG, PNG or WebP under 2 MB.";return}
+  const path=crypto.randomUUID()+"."+f.type.split("/")[1];const u=await db.storage.from("product-images").upload(path,f,{contentType:f.type});
+  if(u.error){$("pm").textContent=u.error.message;return}r.image_url=db.storage.from("product-images").getPublicUrl(path).data.publicUrl}
+ const old=editing&&rows.find(x=>x.id==editing);r.content_hash=await sha256({name:r.name,cat:r.cat,cond:r.cond,price:r.price,description:r.description,image_url:r.image_url||old?.image_url||null});
+ const q=editing?db.from("products").update(r).eq("id",editing):db.from("products").insert(r);const {error}=await q;
+ if(error){$("pm").textContent=error.message;return}clear();toast("Saved. Live on the store now.")};
+$("ssave").onclick=async()=>{const {error}=await db.from("settings").update({hero_title:$("s_hero").value.trim(),hero_text:$("s_text").value.trim(),ig:$("s_ig").value.trim().replace(/^@/,""),markup:Math.max(0,Math.round(+$("s_mk").value||0))}).eq("id",1);$("sm").textContent=error?error.message:"Saved. Live on the store now."};
+gate();
+</script></body></html>
